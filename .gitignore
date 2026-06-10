@@ -23,6 +23,7 @@ env/
 *.pem
 secrets.json
 credentials.json
+config/api_keys.json
 
 # Build
 dist/
