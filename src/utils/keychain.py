@@ -1,9 +1,23 @@
 """macOS Keychain integration for TradeSight API keys."""
 import subprocess
+import json
 import logging
 import os
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+_CONFIG_JSON_PATH = Path(__file__).resolve().parent.parent.parent / 'config' / 'api_keys.json'
+
+def _load_json_config() -> dict:
+    """Load API keys from config/api_keys.json as a fallback."""
+    if _CONFIG_JSON_PATH.exists():
+        try:
+            with open(_CONFIG_JSON_PATH) as f:
+                return json.load(f)
+        except Exception as e:
+            logger.debug(f"Failed to read {_CONFIG_JSON_PATH}: {e}")
+    return {}
 
 class KeychainManager:
     """Manages API keys in macOS Keychain with fallback to environment variables."""
@@ -28,14 +42,15 @@ class KeychainManager:
             logger.warning("macOS security command not found - not running on macOS?")
             return None
     
-    def get_api_key(self, key_name, account="api-key", fallback_env=None):
+    def get_api_key(self, key_name, account="api-key", fallback_env=None, json_key=None):
         """
-        Get API key from Keychain with environment variable fallback.
+        Get API key from Keychain with environment variable and JSON file fallback.
         
         Args:
             key_name: Name of the service/API (e.g., "Alpaca-Key", "Alpaca-Secret")
             account: Account name in keychain (default: "api-key")  
             fallback_env: Environment variable name to check if keychain fails
+            json_key: Key name in config/api_keys.json (e.g. "alpaca_key")
             
         Returns:
             str: API key or empty string if not found
@@ -61,7 +76,15 @@ class KeychainManager:
                 logger.info(f"Using {key_name} API key from environment variable {fallback_env}")
                 return env_key
         
-        logger.warning(f"No {key_name} API key found in keychain or environment")
+        # Fallback to config/api_keys.json
+        if json_key:
+            cfg = _load_json_config()
+            value = cfg.get(json_key, "")
+            if value:
+                logger.info(f"Using {key_name} API key from config/api_keys.json")
+                return value
+        
+        logger.warning(f"No {key_name} API key found in keychain, environment, or config/api_keys.json")
         return ""
     
     def set_api_key(self, key_name, api_key, account="api-key"):
@@ -99,18 +122,17 @@ keychain = KeychainManager()
 
 # Convenience functions for trading API keys
 def get_alpaca_api_key():
-    """Get Alpaca API key from keychain with ALPACA_API_KEY fallback."""
-    # Try both account names (stored as 'luckyai', default was 'api-key')
-    key = keychain.get_api_key('Alpaca-Key', account='luckyai', fallback_env='ALPACA_API_KEY')
+    """Get Alpaca API key from keychain, env, or config/api_keys.json."""
+    key = keychain.get_api_key('Alpaca-Key', account='luckyai', fallback_env='ALPACA_API_KEY', json_key='alpaca_key')
     if not key:
-        key = keychain.get_api_key('Alpaca-Key', fallback_env='ALPACA_API_KEY')
+        key = keychain.get_api_key('Alpaca-Key', fallback_env='ALPACA_API_KEY', json_key='alpaca_key')
     return key
 
 def get_alpaca_secret_key():
-    """Get Alpaca secret key from keychain with ALPACA_SECRET_KEY fallback."""
-    key = keychain.get_api_key('Alpaca-Secret', account='luckyai', fallback_env='ALPACA_SECRET_KEY')
+    """Get Alpaca secret key from keychain, env, or config/api_keys.json."""
+    key = keychain.get_api_key('Alpaca-Secret', account='luckyai', fallback_env='ALPACA_SECRET_KEY', json_key='alpaca_secret')
     if not key:
-        key = keychain.get_api_key('Alpaca-Secret', fallback_env='ALPACA_SECRET_KEY')
+        key = keychain.get_api_key('Alpaca-Secret', fallback_env='ALPACA_SECRET_KEY', json_key='alpaca_secret')
     return key
 
 def get_polygon_api_key():

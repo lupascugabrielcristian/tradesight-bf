@@ -16,7 +16,7 @@ def main():
     print("🚀 Starting dashboard...")
     
     # Change to TradeSight directory
-    os.chdir("/Volumes/Crucial X10/TradeSight")
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     sys.path.insert(0, "src")
     
     print("🌐 Dashboard will be at: http://localhost:5000")
