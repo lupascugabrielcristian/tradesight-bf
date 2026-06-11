@@ -136,8 +136,11 @@ def get_alpaca_secret_key():
     return key
 
 def get_polygon_api_key():
-    """Get Polygon API key from keychain with POLYGON_API_KEY fallback."""
-    return keychain.get_api_key("Polygon", fallback_env="POLYGON_API_KEY")
+    """Get Polygon API key from keychain, env, or config/api_keys.json."""
+    key = keychain.get_api_key("Polygon", fallback_env="POLYGON_API_KEY", json_key="polygon_api_key")
+    if not key:
+        key = keychain.get_api_key("Polygon", fallback_env="POLYGON_API_KEY", json_key="polygon_key")
+    return key
 
 def get_yahoo_api_key():
     """Get Yahoo Finance API key from keychain with YAHOO_API_KEY fallback."""
