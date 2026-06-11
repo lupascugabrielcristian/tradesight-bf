@@ -100,3 +100,30 @@ There are two intervals:
   - `timeframe='1Hour'` for primary signals
   - `timeframe='1Day'` for trend confirmation
 - Scan frequency: `self.config['trade_frequency_hours']` in `PaperTrader.__init__` in `src/trading/paper_trader.py`.
+
+### What run_paper_trader.py does?
+  1. Starts session + websocket monitor for Alpaca trade updates  
+     • src/trading/paper_trader.py:2053, src/trading/paper_trader.py:2019
+  2. Syncs local state with Alpaca account/positions  
+     • imports orphan positions, closes stale local ones  
+     • src/trading/paper_trader.py:1796
+  3. Runs one scan-and-trade pass  
+     • premarket gap checks  
+     • market regime detection  
+     • stop-loss / take-profit / trailing-stop checks on open positions  
+     • daily-loss circuit breaker  
+     • picks strategies (recent tournament winners, or fallback list)  
+     • loops symbols, generates signals, applies filters/guards, executes eligible orders  
+     • src/trading/paper_trader.py:1483
+  4. Closes aged positions (held too long)  
+     • src/trading/paper_trader.py:1697
+  5. Saves portfolio snapshot + generates a trading report file  
+     • report saved to logs as trading_report_*.txt  
+     • src/trading/paper_trader.py:2071
+  6. Logs feedback metrics (if trades closed this session) for optimizer loop  
+     • src/trading/paper_trader.py:2076
+  7. Stops websocket monitor and returns report text  
+     • src/trading/paper_trader.py:2131
+
+  So it is not just “place one trade” — it’s a full risk-managed session pass: sync, risk checks, signal generation, potential order execution, and
+  reporting.

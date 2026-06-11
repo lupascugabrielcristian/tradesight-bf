@@ -216,8 +216,8 @@ class PaperTrader:
             # destroy mean reversion (removed TSLA, ADBE, AMD, BA - too volatile)
             # PDT avoided via min_hold_hours, not small watchlist
             'trading_symbols': [
-                'AAPL', 'NVDA'
-                # 'SPY', 'QQQ',                      # Broad market ETFs
+                'AAPL', 'NVDA',
+                'SPY', 'QQQ',                      # Broad market ETFs
                 # 'AAPL', 'MSFT', 'GOOGL', 'AMZN',  # Tech mega-cap
                 # 'META',                             # Tech (stable post-2024)
                 # 'JPM', 'BAC', 'V', 'MA',           # Financials
