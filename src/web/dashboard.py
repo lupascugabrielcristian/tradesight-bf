@@ -221,12 +221,12 @@ def api_performance():
             portfolio_value = 500.0 + total_pnl
             try:
                 bal = conn.execute(
-                    "SELECT balance FROM balance_sync ORDER BY synced_at DESC LIMIT 1"
+                    "SELECT buying_power FROM balance_cache WHERE id = 1"
                 ).fetchone()
                 if bal:
                     portfolio_value = bal[0]
             except Exception as e:
-                logger.warning(f"Failed to read balance_sync: {e}")
+                logger.warning(f"Failed to read balance_cache: {e}")
             
             return jsonify({
                 'portfolio_value': round(portfolio_value, 2),
