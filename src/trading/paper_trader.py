@@ -216,14 +216,15 @@ class PaperTrader:
             # destroy mean reversion (removed TSLA, ADBE, AMD, BA - too volatile)
             # PDT avoided via min_hold_hours, not small watchlist
             'trading_symbols': [
-                'SPY', 'QQQ',                      # Broad market ETFs
-                'AAPL', 'MSFT', 'GOOGL', 'AMZN',  # Tech mega-cap
-                'META',                             # Tech (stable post-2024)
-                'JPM', 'BAC', 'V', 'MA',           # Financials
-                'JNJ', 'PFE',                       # Healthcare
-                'XOM', 'CVX',                       # Energy
-                'WMT', 'COST', 'HD',               # Consumer/Retail
-                'KO', 'DIS',                        # Consumer staples + media
+                'AAPL', 'NVDA'
+                # 'SPY', 'QQQ',                      # Broad market ETFs
+                # 'AAPL', 'MSFT', 'GOOGL', 'AMZN',  # Tech mega-cap
+                # 'META',                             # Tech (stable post-2024)
+                # 'JPM', 'BAC', 'V', 'MA',           # Financials
+                # 'JNJ', 'PFE',                       # Healthcare
+                # 'XOM', 'CVX',                       # Energy
+                # 'WMT', 'COST', 'HD',               # Consumer/Retail
+                # 'KO', 'DIS',                        # Consumer staples + media
             ],
             'min_strategy_confidence': 0.55,  # Slightly higher bar for fewer, better trades
             'max_concurrent_trades': 5,       # 5 positions for more data (fractional shares)
@@ -404,7 +405,7 @@ class PaperTrader:
             # Get daily data for trend confirmation (Task 14)
             daily_trend = 'unknown'
             try:
-                daily_data = self.alpaca.get_historical_data(symbol, days=200, timeframe='1Day')
+                daily_data = self.alpaca.get_historical_data(symbol, days=200, timeframe='15Min')
                 if daily_data is not None and len(daily_data) >= 50:
                     daily_sma50 = daily_data['close'].rolling(50).mean()
                     daily_sma20 = daily_data['close'].rolling(20).mean()

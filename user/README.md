@@ -69,3 +69,34 @@ And optionally a date/time column (set with `--date-column`, default is `date`).
 - If `--csv` is provided, the script uses CSV mode.
 - If `--csv` is not provided, it generates sample OHLCV data.
 - The backtest engine requires at least 50 rows.
+
+## Run a paper trade session (Alpaca paper account)
+
+From project root:
+
+```bash
+python3 run_paper_trader.py
+```
+
+Useful commands:
+
+```bash
+python3 run_paper_trader.py --status
+python3 run_paper_trader.py --report
+```
+
+## Where to change symbols, strategy, and time interval
+
+### Symbols
+Edit `src/trading/paper_trader.py` in `PaperTrader.__init__`, inside `self.config['trading_symbols']`.
+
+### Strategy
+TradeSight uses tournament winners first. If no winners are available, it uses fallback strategies in `scan_and_trade()` in `src/trading/paper_trader.py` (`winning_strategies` list). Keep only one entry there to force a single strategy.
+
+### Time interval
+There are two intervals:
+
+- Signal candle timeframe (market data granularity): in `generate_trading_signals()` in `src/trading/paper_trader.py`, currently:
+  - `timeframe='1Hour'` for primary signals
+  - `timeframe='1Day'` for trend confirmation
+- Scan frequency: `self.config['trade_frequency_hours']` in `PaperTrader.__init__` in `src/trading/paper_trader.py`.
